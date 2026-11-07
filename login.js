@@ -1,4 +1,4 @@
-import { usuarios } from './datos.js';
+import { loguearUsuario, obtenerUsuarioActivo } from './almacenaje.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -6,10 +6,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const mensajeDiv = document.getElementById('mensaje');
     const userLoggedInSpan = document.getElementById('userLoggedIn');
 
-    const usuarioGuardado = localStorage.getItem('usuarioLogueado');
-    if (usuarioGuardado) {
-        const usuario = JSON.parse(usuarioGuardado);
-        userLoggedInSpan.textContent = usuario.email;
+    //1. Comprobamos si hay un usuario logueado cuando se carga la página y mostramos su nombre
+    const usuarioGuardado = obtenerUsuarioActivo();
+    if (usuarioGuardado && userLoggedInSpan) {
+        userLoggedInSpan.textContent = usuarioGuardado.nombre;
+    }
+
+    //2.Manejamos el envío del formulario
+    if (loginForm) {
+        loginForm.addEventListener('submit', (evento) => {
+            evento.preventDefault();
+
+            const emailInput = document.getElementById('email').value.trim();
+            const passwordInput = document.getElementById('password').value;
+
+            //Llamamos a la función del archivo almacenaje.js
+            const resultado = loguearUsuario(emailInput, passwordInput);
+
+            if (resultado.exito) {
+                mensajeDiv.innerHTML = '<span class="text-success fw-bold">Inicio de sesión exitoso</span>';
+
+                if (userLoggedInSpan) {
+                    userLoggedInSpan.textContent = resultado.usuario.nombre;
+
+                    alert('Inicio de sesión exitoso. Bienvenido/a ${resultado.usuario.nombre}');
+
+                    //Redirigimos al index.html después del login
+                    window.location.href='index.html';
+                } else {
+                    mensajeDiv.innerHTML = '<span class="text-danger fw-bold">Credenciales incorrectas.</span>';
+
+                    if (userLoggedInSpan) {
+                        userLoggedInSpan.textContent = '-no login-';
+                    }
+
+                    //Limpiamos cualquier sesión previa si fallase el logueo
+                    localStorage.removeItem('usuarioLogueado');
+                }
+            }
+        })
     }
 
     loginForm.addEventListener('submit', (evento) => {

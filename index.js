@@ -1,8 +1,28 @@
-import { usuarios, intercambios } from './datos.js';
+import { obtenerIntercambios, obtenerUsuarios} from './almacenaje.js';
 
-const listado = document.querySelector("#listado-dashboard");
+document.addEventListener('DOMContentLoaded', async () => {
+    const listado = document.querySelector("#listado-dashboard");
 
-intercambios.forEach((intercambio) => {
+    //1.Obtenemos los datos almacenados en arrays
+    let intercambios = [];
+    let usuarios = [];
+
+    try {
+        if (obtenerIntercambios) intercambios = await obtenerIntercambios();
+        if (obtenerUsuarios) usuarios = await obtenerUsuarios();
+    } catch (error) {
+        console.log("Base de datos no inicializada.");
+    }
+
+    //2.Si no hay intercambios se muestra un mensaje
+    if (!intercambios || intercambios.length === 0) {
+        listado.innerHTML = '<p class="text-center text-muted mt-4">No hay intercambios disponibles.</p>';
+        return;
+    }
+
+    //3.Si hay intercambios se muestran las tarjetas en el dashboard
+
+    intercambios.forEach((intercambio) => {
     const esOferta = intercambio.tipo === "oferta";
 
     const tarjeta = document.createElement("article");
@@ -41,4 +61,7 @@ intercambios.forEach((intercambio) => {
     contenido.append(tipo, titulo, idioma, descripcion);
     tarjeta.append(contenido, pie);
     listado.append(tarjeta);
+    });
+
 });
+
