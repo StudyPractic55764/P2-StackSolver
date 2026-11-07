@@ -1,0 +1,30 @@
+.cuadrado {
+   border: 1px solid #dee2e6;
+   border-radius: 10px;
+   background-color: #ffffff;
+   height: 100%;        /*Esto permite que los dos cuadros midan lo mismo */
+   box-sizing: border-box;
+}
+
+.titulo-lista {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.cuadrado-contenido {
+    font-size: 1em;
+    color: #333;
+}
+
+.tarjeta-usuario {
+    transition: background-color 0.2s ease;
+}
+
+.tarjeta-usuario:hover {
+    background-color: #f8f9fa;
+}
+
+.btn-baja {
+    white-space: nowrap;
+}
