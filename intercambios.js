@@ -1,6 +1,14 @@
-import { guardarIntercambio, obtenerIntercambios, borrarIntercambio } from "./almacenaje.js";
+import { guardarIntercambio, obtenerIntercambios, borrarIntercambio, obtenerUsuarioActivo } from "./almacenaje.js";
 
 document.addEventListener('DOMContentLoaded', () => {
+    //Actualizamos el nombre en la barra superior
+    const usuarioActivo = obtenerUsuarioActivo();
+    const spanUsuario = document.getElementById('userLoggedIn');
+    if (usuarioActivo && spanUsuario) {
+        spanUsuario.textContent = usuarioActivo.nombre;
+    }
+
+
     const formulario = document.querySelector("#form-intercambio");
     const listado = document.querySelector("#listado-intercambios");
 
@@ -94,12 +102,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const usuarioActivo = obtenerUsuarioActivo();
+            const idAutor = usuarioActivo ? usuarioActivo.id : 1;
+
             const nuevoIntercambio = {
                 tipo: tipo,
                 titulo: titulo,
                 idioma: idioma,
                 descripcion: descripcion,
-                usuarioId: 1 //De momento asignaremos un ID fijo
+                usuarioId: idAutor
             };
 
             try {

@@ -1,6 +1,14 @@
-import { obtenerIntercambios, obtenerUsuarios} from './almacenaje.js';
+import { obtenerIntercambios, obtenerUsuarios, obtenerUsuarioActivo} from './almacenaje.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+    //Actualizamos el nombre en la barra superior
+    const usuarioActivo = obtenerUsuarioActivo();
+    const spanUsuario = document.getElementById('userLoggedIn');
+    if (usuarioActivo && spanUsuario) {
+        spanUsuario.textContent = usuarioActivo.nombre;
+    }
+    
+    
     const listado = document.querySelector("#listado-dashboard");
 
     //1.Obtenemos los datos almacenados en arrays
@@ -50,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ? `${intercambio.descripcion.slice(0, 120)}…`
         : intercambio.descripcion;
 
-    const autor = usuarios.find ? usuarios.find((usuario) => usuario.id === intercambio.usuarioId) : null;
+    const autor = usuarios && usuarios.length > 0 ? usuarios.find(u => usuario.id === intercambio.usuarioId) : null;
 
     const pie = document.createElement("div");
     pie.className = "tarjeta-footer";

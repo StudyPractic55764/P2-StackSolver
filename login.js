@@ -24,12 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (resultado.exito) {
                 mensajeDiv.innerHTML = '<span class="text-success fw-bold">Inicio de sesión exitoso</span>';
 
-                // CORREGIDO: Cerramos la llave del if
                 if (userLoggedInSpan) {
                     userLoggedInSpan.textContent = resultado.usuario.nombre;
                 }
 
-                // CORREGIDO: Usamos comillas invertidas (backticks) para que funcione el ${}
                 alert(`Inicio de sesión exitoso. Bienvenido/a ${resultado.usuario.nombre}`);
                 
                 window.location.href = 'index.html';
@@ -43,6 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 localStorage.removeItem('usuarioLogueado');
             }
-        }); // <-- Cierre del addEventListener
-    }       // <-- Cierre del if (loginForm)
-});         // <-- Cierre del DOMContentLoaded
+        });
+    }
+});

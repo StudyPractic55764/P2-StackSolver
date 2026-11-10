@@ -1,6 +1,12 @@
 import { altaUsuario, borrarUsuario, obtenerUsuarioActivo, cerrarSesion, obtenerUsuarios } from "./almacenaje.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+    //Actualizamos el nombre en la barra superior
+    const usuarioActivo = obtenerUsuarioActivo();
+    const spanUsuario = document.getElementById('userLoggedIn');
+    if (usuarioActivo && spanUsuario) {
+        spanUsuario.textContent = usuarioActivo.nombre;
+    }
 
     const listadoUsuarios = document.getElementById("listado-usuarios");
     const formulario = document.getElementById("form-usuario");
