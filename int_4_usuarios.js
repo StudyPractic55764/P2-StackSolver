@@ -3,7 +3,7 @@ import { altaUsuario, borrarUsuario, obtenerUsuarioActivo, cerrarSesion, obtener
 document.addEventListener("DOMContentLoaded", () => {
     //Actualizamos el nombre en la barra superior
     const usuarioActivo = obtenerUsuarioActivo();
-    const spanUsuario = document.getElementById('userLoggedIn');
+    const spanUsuario = document.getElementById('usuarioActivo');
     if (usuarioActivo && spanUsuario) {
         spanUsuario.textContent = usuarioActivo.nombre;
     }
@@ -20,33 +20,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //PRINTAMOS TODOS LOS USUARIOS REGISTRADOS
 
-    function printarUsuarios() {
-        if (!listadoUsuarios) return;
-
-        listadoUsuarios.innerHTML = ''; //Limpiamos el contenedor para obtener los usuarios de localStorage
+    function printarUsuarios() {    
         const usuarios = obtenerUsuarios();
+        listadoUsuarios.replaceChildren();
 
         if (usuarios.length === 0) {
-            listadoUsuarios.innerHTML = `
-                <div class="col-12">    
-                    <p>No hay usuarios registrados.</p>
-                </div>
-            `;
+            const fila = document.createElement("tr");
+            const celda = document.createElement("td");
+
+            celda.colSpan = 4;
+            celda.textContent = "No hay usuarios registrados.";
+            fila.append(celda);
+            listadoUsuarios.append(fila);
             return;
         }
 
-        usuarios.forEach(usuario => {
-            listadoUsuarios.innerHTML += `
-                <div class="col-12">
-                    <div class="tarjeta-usuario p-3 border rounded bg-light d-flex justify-content-between align-items-center">
-                        <div class="info-usuario">
-                            <strong>Nombre:</strong> ${usuario.nombre}<br>
-                            <strong>Email:</strong> ${usuario.email}
-                        </div>
-                        <button class="btn btn-danger btn-sm btn-baja" data-id="${usuario.id}"> Dar de baja </button>
-                    </div>
-                </div>
-            `;
+        usuarios.forEach((usuario) => {
+            const fila = document.createElement("tr");
+            const valores = [usuario.nombre, usuario.email, "••••••"];
+
+            valores.forEach((valor) => {
+                const celda = document.createElement("td");
+                celda.textContent = valor;
+                fila.append(celda);
+            });
+
+            const acciones = document.createElement("td");
+            const boton = document.createElement("button");
+
+            boton.type = "button";
+            boton.className = "btn btn-danger btn-sm btn-baja";
+            boton.dataset.id = usuario.id;
+            boton.textContent = "Dar de baja";
+
+            acciones.append(boton);
+            fila.append(acciones);
+            listadoUsuarios.append(fila);
         });
     }
 
@@ -89,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const idUsuario = parseInt(evento.target.dataset.id);
 
                 if (confirm("¡Estás seguro de que desea dar de baja a este usuario?")) {
-
+                    borrarUsuario(idUsuario);
                     //Comprobamos si el usuario que vamos a borrar es el que está logueado
                     const usuarioActivo = obtenerUsuarioActivo();
                     if (usuarioActivo && usuarioActivo.id === idUsuario) {
@@ -99,7 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         return;
                     }
 
-                    borrarUsuario(idUsuario);
                     printarUsuarios();
                 }
             }

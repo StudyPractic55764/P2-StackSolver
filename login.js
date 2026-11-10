@@ -1,46 +1,46 @@
-import { loguearUsuario, obtenerUsuarioActivo } from './almacenaje.js';
+import {
+    loguearUsuario as autenticarUsuario,
+    obtenerUsuarioActivo,
+    cerrarSesion
+} from "./almacenaje.js";
 
-document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('loginForm');
-    const mensajeDiv = document.getElementById('mensaje');
-    const userLoggedInSpan = document.getElementById('userLoggedIn');
+function mostrarUsuarioActivo() {
+    const indicador = document.getElementById("usuarioActivo");
+    const usuario = obtenerUsuarioActivo();
 
-    // 1. Comprobamos si hay un usuario logueado cuando se carga la página
-    const usuarioGuardado = obtenerUsuarioActivo();
-    if (usuarioGuardado && userLoggedInSpan) {
-        userLoggedInSpan.textContent = usuarioGuardado.nombre;
+    indicador.textContent = usuario?.nombre ?? "-no login-";
+}
+
+function loguearUsuario(email, password) {
+    const resultado = autenticarUsuario(email, password);
+    const mensaje = document.getElementById("mensaje");
+
+    if (!resultado.exito) {
+        cerrarSesion();
+        mostrarUsuarioActivo();
+
+        mensaje.className = "mt-3 text-center text-danger fw-bold";
+        mensaje.textContent = resultado.mensaje;
+        alert(resultado.mensaje);
+        return;
     }
 
-    // 2. Manejamos el envío del formulario
-    if (loginForm) {
-        loginForm.addEventListener('submit', (evento) => {
-            evento.preventDefault();
+    mostrarUsuarioActivo();
+    alert(`Inicio de sesión exitoso. Bienvenido/a ${resultado.usuario.nombre}`);
+    window.location.href = "index.html";
+}
 
-            const emailInput = document.getElementById('email').value.trim();
-            const passwordInput = document.getElementById('password').value;
+document.addEventListener("DOMContentLoaded", () => {
+    const formulario = document.getElementById("loginForm");
 
-            const resultado = loguearUsuario(emailInput, passwordInput);
+    mostrarUsuarioActivo();
 
-            if (resultado.exito) {
-                mensajeDiv.innerHTML = '<span class="text-success fw-bold">Inicio de sesión exitoso</span>';
+    formulario.addEventListener("submit", (evento) => {
+        evento.preventDefault();
 
-                if (userLoggedInSpan) {
-                    userLoggedInSpan.textContent = resultado.usuario.nombre;
-                }
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
 
-                alert(`Inicio de sesión exitoso. Bienvenido/a ${resultado.usuario.nombre}`);
-                
-                window.location.href = 'index.html';
-
-            } else {
-                mensajeDiv.innerHTML = '<span class="text-danger fw-bold">Credenciales incorrectas.</span>';
-
-                if (userLoggedInSpan) {
-                    userLoggedInSpan.textContent = '-no login-';
-                }
-
-                localStorage.removeItem('usuarioLogueado');
-            }
-        });
-    }
+        loguearUsuario(email, password);
+    });
 });
