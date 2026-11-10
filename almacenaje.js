@@ -70,7 +70,7 @@ export function cerrarSesion() {
 //MÓDULO DE ALMACENAJE (IndexedDB - Intercambios)
 
 const DB_NAME = "StackSolverDB";
-const DB_VERSION = 1;
+const DB_VERSION = 4;
 const STORE_NAME = "intercambios";
 
 //1. Función para conectar con la base de datos
@@ -83,8 +83,18 @@ export function abrirDB() {
         //Si la base de datos es nueva o cambia de version, creamos el "almacen"/tabla
         request.onupgradeneeded = (event) => {
             const db = event.target.result;
-            if(!db.objectStoreNames.contains(STORE_NAME)) {
-                db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true});
+
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, {
+                    keyPath: "id",
+                    autoIncrement: true
+                });
+            }
+
+            if (!db.objectStoreNames.contains("selecciones")) {
+                db.createObjectStore("selecciones", {
+                    keyPath: ["usuario", "intercambioId"]
+                });
             }
         };
 
@@ -141,4 +151,47 @@ export async function borrarIntercambio(id) {
         request.onerror = () => reject("Error al borrar el intercambio");
     });
     
+}
+
+export async function obtenerSeleccion(usuario) {
+    const db = await abrirDB();
+
+    return new Promise((resolve, reject) => {
+        const transaccion = db.transaction("selecciones", "readonly");
+        const peticion = transaccion.objectStore("selecciones").getAll();
+
+        peticion.onsuccess = () => {
+            const ids = peticion.result
+                .filter((registro) => registro.usuario === usuario)
+                .map((registro) => registro.intercambioId);
+
+            resolve(ids);
+        };
+
+        peticion.onerror = () => reject(peticion.error);
+    });
+}
+
+export async function guardarSeleccion(usuario, intercambioId) {
+    const db = await abrirDB();
+
+    return new Promise((resolve, reject) => {
+        const transaccion = db.transaction("selecciones", "readwrite");
+        transaccion.oncomplete = () => resolve();
+        transaccion.onabort = () => reject(transaccion.error);
+
+        transaccion.objectStore("selecciones").put({ usuario, intercambioId });
+    });
+}
+
+export async function quitarDeSeleccion(usuario, intercambioId) {
+    const db = await abrirDB();
+
+    return new Promise((resolve, reject) => {
+        const transaccion = db.transaction("selecciones", "readwrite");
+        transaccion.oncomplete = () => resolve();
+        transaccion.onabort = () => reject(transaccion.error);
+
+        transaccion.objectStore("selecciones").delete([usuario, intercambioId]);
+    });
 }
