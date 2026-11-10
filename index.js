@@ -50,9 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ? `${intercambio.descripcion.slice(0, 120)}…`
         : intercambio.descripcion;
 
-    const autor = usuarios.find((usuario) => {
-        return usuario.id === intercambio.usuarioId;
-    });
+    const autor = usuarios.find ? usuarios.find((usuario) => usuario.id === intercambio.usuarioId) : null;
 
     const pie = document.createElement("div");
     pie.className = "tarjeta-footer";
