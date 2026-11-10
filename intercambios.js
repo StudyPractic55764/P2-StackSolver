@@ -1,5 +1,5 @@
-import { intercambios } from "./datos.js";
-import { usuarios } from './datos.js';
+console.log("Módulo de intercambios cargado. Pendiente de conectar con IndexedDB.");
+
 
 const listado = document.querySelector("#listado-intercambios");
 

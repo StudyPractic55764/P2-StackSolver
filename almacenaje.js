@@ -6,7 +6,7 @@ export function obtenerUsuarios() {
 }
 
 export function guardarUsuarios(usuarios) {
-    localStorage.getItem('usuarios', JSON.stringify(usuarios));
+    localStorage.setItem('usuarios', JSON.stringify(usuarios));
 }
 
 export function altaUsuario(nombre, email, password) {
@@ -31,11 +31,17 @@ export function altaUsuario(nombre, email, password) {
     return { exito: true, mensaje: "Usuario registrado correctamente"};
 }
 
+export function borrarUsuario(id) {
+    let usuarios = obtenerUsuarios();
+    usuarios = usuarios.filter(u => u.id !== id);
+    guardarUsuarios(usuarios);
+}
+
 //-----------------------------------------------------------------------------------
 //GESTIÓN DE SESIÓN (login)
 
 export function loguearUsuario(email, password) {
-    const usuarios = obtenerUsuarios;
+    const usuarios = obtenerUsuarios();
 
     //Busca al usuario que coincida con el email y contraseña
     const usuarioEncontrado = usuarios.find(
@@ -58,7 +64,7 @@ export function obtenerUsuarioActivo() {
 }
 
 export function cerrarSesion() {
-    localStorage.removeItem('usuarioActivo');
+    localStorage.removeItem('usuarioLogueado');
 }
 //------------------------------------------------------------------------------------------------
 //MÓDULO DE ALMACENAJE (IndexedDB - Intercambios)
@@ -78,7 +84,7 @@ export function abrirDB() {
         request.onupgradeneeded = (event) => {
             const db = event.target.result;
             if(!db.objectStoreNames.contains(STORE_NAME)) {
-                db.createObjectStore(STORE_NAME, { keyPatch: 'id', autoIncrement: true});
+                db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true});
             }
         };
 
@@ -126,7 +132,7 @@ export async function obtenerIntercambios() {
 //4.Borrar intercambios por su ID
 export async function borrarIntercambio(id) {
     const db = await abrirDB();
-    return new Promise((resolver, reject) => {
+    return new Promise((resolve, reject) => {
         const transaction = db.transaction([STORE_NAME], "readwrite");
         const store = transaction.objectStore(STORE_NAME);
         const request = store.delete(id);

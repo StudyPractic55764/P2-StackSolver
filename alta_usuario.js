@@ -1,6 +1,6 @@
-import { usuarios } from "./datos.js";
+import { altaUsuario, borrarUsuario, obtenerUsuarioActivo, cerrarSesion, obtenerUsuarios } from "./almacenaje.js";
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
 
     const listadoUsuarios = document.getElementById("listado-usuarios");
     const formulario = document.getElementById("form-usuario");
@@ -14,10 +14,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
     //PRINTAMOS TODOS LOS USUARIOS REGISTRADOS
 
-    function printarUsuarios(lista) {
-        listadoUsuarios.innerHTML = "";
+    function printarUsuarios() {
+        if (!listadoUsuarios) return;
 
-        if (lista.length === 0) {
+        listadoUsuarios.innerHTML = ''; //Limpiamos el contenedor para obtener los usuarios de localStorage
+        const usuarios = obtenerUsuarios();
+
+        if (usuarios.length === 0) {
             listadoUsuarios.innerHTML = `
                 <div class="col-12">    
                     <p>No hay usuarios registrados.</p>
@@ -26,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        lista.forEach(usuario => {
+        usuarios.forEach(usuario => {
             listadoUsuarios.innerHTML += `
                 <div class="col-12">
                     <div class="tarjeta-usuario p-3 border rounded bg-light d-flex justify-content-between align-items-center">
@@ -41,62 +44,59 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    printarUsuarios(usuarios);
+    //Printamos los usuarios al cargar la página
+    printarUsuarios();
     
     
-    listadoUsuarios.addEventListener("click", function(evento) {
-        if (evento.target.classList.contains("btn-baja")) {
-
-            const idUsuario = parseInt(evento.target.dataset.id);
-            const confirmar = confirm("¿Está seguro que desea dar de baja al usuario?");
-
-            if (confirmar) {
-
-                const indice = usuarios.findIndex(u => u.id === idUsuario);
-
-                if (indice !== -1) {
-                    usuarios.splice(indice, 1);
-                    printarUsuarios(usuarios);
-                }
-            }
-        }
-    });
+    
    
 
-    //FUNCIONES PARA AÑADIR NUEVOS USUARIOS
+    //EVENTO PARA AÑADIR NUEVOS USUARIOS
 
     if(formulario) {
-        formulario.addEventListener("submit", function(evento) {
+        formulario.addEventListener("submit", (evento) => {
             evento.preventDefault();
 
             const nombre = document.getElementById("nombre").value.trim();
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value;
 
-            const emailExiste = usuarios.some(u => u.email.toLowerCase() === email.toLowerCase());
+            const resultado = altaUsuario(nombre, email, password);
 
-            if (emailExiste) {
-                alert("ERROR: Ya existe un usuario con ese email");
-                return;
+            if (resultado.exito) {
+                formulario.reset();
+                printarUsuarios();
+                alert("Usuario registrado correctamente");
+            } else {
+                alert(resultado.mensaje);
             }
-
-            const nuevoID = usuarios.length > 0 ? Math.max(...usuarios.map(u => u.id)) + 1 : 1;
-
-            const nuevoUsuario = {
-                id: nuevoID,
-                nombre: nombre,
-                email: email,
-                password: password
-            };
-
-            usuarios.push(nuevoUsuario);
-
-            printarUsuarios(usuarios);
-            formulario.reset();
-
-            alert(`Usuario ${nombre} registrado con éxito!`);
         });
     } else {
-        console.error("No se encontró el formulario con id 'form-usuario'");   
-    };
+        console.log("No se encontró el forumlario con id 'form-usuario'");
+    }
+    
+
+    //EVENTO PARA DAR DE BAJA
+    if (listadoUsuarios) {
+        listadoUsuarios.addEventListener("click", (evento) => {
+            if (evento.target.classList.contains("btn-baja")) {
+                const idUsuario = parseInt(evento.target.dataset.id);
+
+                if (confirm("¡Estás seguro de que desea dar de baja a este usuario?")) {
+
+                    //Comprobamos si el usuario que vamos a borrar es el que está logueado
+                    const usuarioActivo = obtenerUsuarioActivo();
+                    if (usuarioActivo && usuarioActivo.id === idUsuario) {
+                        cerrarSesion();
+                        alert ("Has dado de baja tu propia cuenta. Se cerrará la sesión.");
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    borrarUsuario(idUsuario);
+                    printarUsuarios();
+                }
+            }
+        });
+    }
 });
