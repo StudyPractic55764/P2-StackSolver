@@ -10,16 +10,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     
     const listado = document.querySelector("#listado-dashboard");
+    if (!listado) return;
 
     //1.Obtenemos los datos almacenados en arrays
     let intercambios = [];
     let usuarios = [];
 
     try {
-        if (obtenerIntercambios) intercambios = await obtenerIntercambios();
-        if (obtenerUsuarios) usuarios = await obtenerUsuarios();
+        intercambios = await obtenerIntercambios();
+        usuarios = await obtenerUsuarios();
     } catch (error) {
-        console.log("Base de datos no inicializada.");
+        console.log("Error al cargar datos de la base de datos.");
     }
 
     //2.Si no hay intercambios se muestra un mensaje
@@ -58,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ? `${intercambio.descripcion.slice(0, 120)}…`
         : intercambio.descripcion;
 
-    const autor = usuarios && usuarios.length > 0 ? usuarios.find(u => usuario.id === intercambio.usuarioId) : null;
+    const autor = usuarios.find(u => u.id === intercambio.usuarioId);
 
     const pie = document.createElement("div");
     pie.className = "tarjeta-footer";
